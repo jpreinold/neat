@@ -1,2 +1,2 @@
-# neat
+# Neat
 Neuroevolution of Augmenting Topologies -  implemented with Javascript and p5
