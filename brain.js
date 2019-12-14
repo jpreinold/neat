@@ -65,7 +65,6 @@ class Brain {
     return newConnection;
   }
 
-
   think(inputs){
 
   }
