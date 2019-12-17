@@ -17,7 +17,7 @@ class Node {
     this.isValueSet = false;
     this.value = null;        // not initialized until incorporated into brain
 
-    this.depth = -1;
+    this.depth = depth;
 
     this.position = new Coordinate(-1, -1);  // Used for visualizing
   }
@@ -100,6 +100,6 @@ class Node {
     if(this.isValueSet){
       value = ", value: " + str(this.value);
     }
-    return "Node: id: " + this.id + ", type: " + this.type + value + ", Position: (" + this.position.getX() + ", " + this.position.getY() + ")";
+    return "Node: id: " + this.id + ", type: " + this.type + value + ", Position: (" + this.position.getX() + ", " + this.position.getY() + "), Depth: " + this.depth;
   }
 }

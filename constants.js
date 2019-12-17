@@ -33,3 +33,19 @@ function randFloat(min, max) {
 function randBool() {
   return Math.random() >= 0.5;
 }
+
+function getProbability( probabilityRate ){
+  let prob = randInt(0, 100);
+  if(prob < probabilityRate){
+    return true;
+  } else {
+    return false;
+  }
+}
+
+let nodeRadius;
+let nodePadding;
+let visualizeX;
+let visualizeY;
+let visualizeWidth;
+let visualizeHeight;
