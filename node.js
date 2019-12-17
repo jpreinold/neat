@@ -11,11 +11,15 @@ const nodeType = {
 // type should incorporate the nodeType enum
 
 class Node {
-  constructor(id, type){
+  constructor(id, type, depth){
     this.id = id;             // id for the Node
     this.type = type;         // nodeType - i.e. "input", "output", "hidden"
     this.isValueSet = false;
     this.value = null;        // not initialized until incorporated into brain
+
+    this.depth = -1;
+
+    this.position = new Coordinate(-1, -1);  // Used for visualizing
   }
 
   //  ---------------------- Start getters and setters ------------------------ //
@@ -56,6 +60,38 @@ class Node {
     this.isValueSet = true;
   }
 
+  setPosition(x, y){
+    this.position.setCoordinate(x, y);
+  }
+
+  getPosition(x, y){
+    return this.position.getCoordinate();
+  }
+
+  getX(){
+    return this.position.getX();
+  }
+
+  getY(){
+    return this.position.getY();
+  }
+
+  setX(x){
+    this.position.setX(x);
+  }
+
+  setY(y){
+    this.position.setX(y);
+  }
+
+  getDepth(){
+    return this.depth;
+  }
+
+  setDepth(depth){
+    this.depth = depth;
+  }
+
   //  ---------------------- End getters and setters ------------------------ //
 
   // Returns a string representation of the Node
@@ -64,6 +100,6 @@ class Node {
     if(this.isValueSet){
       value = ", value: " + str(this.value);
     }
-    return "Node: id: " + this.id + ", type: " + this.type + value;
+    return "Node: id: " + this.id + ", type: " + this.type + value + ", Position: (" + this.position.getX() + ", " + this.position.getY() + ")";
   }
 }

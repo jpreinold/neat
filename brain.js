@@ -9,20 +9,23 @@ class Brain {
   constructor(numInputs, numOutputs){
     this.nodes = [];                // The List of Nodes
     this.connections = [];          // The List of Connections
-    this.numInputs = numInputs;     // Number of numInputs
+    this.hiddenLayers = [];         // The List of 2D Hidden Layers
+    this.numInputs = numInputs;     // Number of Inputs
+    this.numHiddenNodes = 0;        // Number of Hidden Nodes
+    this.numHiddenLayers = 0;       // Number of Hidden Layers
     this.numOutputs = numOutputs;   // Number of Outputs
     this.numNodes = 0;              // Number of Nodes in the Brain structure
     this.numConnections = 0;        // Number of Connections in the Brain structure
+    this.totalDepth = 2;            // Initial no hidden layers (Only Input and Output layers)
 
 
     // Set up basic I/O Brain structure
     for(let i = 0; i < numInputs; i++){
-      this.nodes.push(this.createNewNode(nodeType.IN));
+      this.nodes.push(this.createNewNode(nodeType.IN, 0));
 
     }
     for(let i = 0; i < numOutputs; i++){
-      this.nodes.push(this.createNewNode(nodeType.OUT));
-      this.numNodes += 1;
+      this.nodes.push(this.createNewNode(nodeType.OUT, this.totalDepth - 1));
     }
 
   }
@@ -39,16 +42,20 @@ class Brain {
       }
     }
     if(!found) { i = -1 };
-    return i;
+    return i - 1;
+  }
+
+  getNodeId(index){
+    return this.nodes[index].getId();
   }
 
   // Creates a new Node object
   // @return - new Node object
-  createNewNode(type){
+  createNewNode(type, depth){
 
     let newNode;
 
-    newNode = new Node(this.numNodes, type);
+    newNode = new Node(this.numNodes, type, depth);
     this.numNodes += 1;
 
     return newNode;
@@ -65,16 +72,63 @@ class Brain {
     return newConnection;
   }
 
+  mutateAddConnection(){
+    let inNodeIndex, outNodeIndex, inNodeId, outNodeId, weight, enabled, innov;
+    let selectNewNodes = true;
+    while(selectNewNodes){
+
+      inNodeIndex = randInt(0, this.numNodes - this.numOutputs);
+      outNodeIndex = randInt(this.numInputs, this.numNodes - 1);
+      if(this.nodes[outNodeIndex].getDepth() < this.nodes[inNodeIndex].getDepth()){
+        let temp = outNodeIndex;
+        outNodeIndex = inNodeIndex;
+        inNodeIndex = temp;
+      }
+
+      selectNewNodes = false;
+      for(let i = 0; i < this.connections.length; i++){   // Traverse connections to see if it Already exists
+        if(this.connections[i].getInNodeId() == this.nodes[inNodeIndex].getId()){
+          if(this.connections[i].getOutNodeId() == this.nodes[outNodeIndex].getId()){
+            selectNewNodes = true;
+          }
+        }
+      }
+    }
+
+    inNodeId = this.getNodeId(inNodeIndex);
+    outNodeId = this.getNodeId(outNodeIndex);
+
+    weight = randFloat(-1, 1);
+    enabled = randBool();
+    innov = this.numConnections + 1;
+
+    this.connections.push(this.createNewConnection(inNodeId, outNodeId, weight, enabled, innov));
+
+
+
+  }
+
+  mutateAddNode(){
+
+  }
+
   think(inputs){
 
   }
 
-  setColor(value){
-    value = int(value * 100);
-    let r = map(value, 0, 100, negativeColor.R, positiveColor.R);
-    let g = map(value, 0, 100, negativeColor.G, positiveColor.G);
-    let b = map(value, 0, 100, negativeColor.B, positiveColor.B);
-    fill(r, g, b);
+  setColorAndWeight(value, weight){
+    strokeWeight(Math.round(weight));
+    if(value != -1){
+      value = int(value * 100);
+      let r = map(value, 0, 100, negativeColor.R, positiveColor.R);
+      let g = map(value, 0, 100, negativeColor.G, positiveColor.G);
+      let b = map(value, 0, 100, negativeColor.B, positiveColor.B);
+      stroke(r, g, b);
+      fill(r, g, b);
+    } else {
+      stroke(255);
+      fill(255);
+    }
   }
 
   // Displays brain structure within boundaries given
@@ -83,54 +137,70 @@ class Brain {
     let nodePadding = height / 15;
     let inputLayerHeight = this.numInputs * (nodePadding) - nodePadding;
     let outputLayerHeight = this.numOutputs * (nodePadding) - nodePadding;
-    let offset = (height - inputLayerHeight) / 2;
 
-    // visualize inputs
-    for(let i = 0; i < this.numInputs; i++){
+    let inputOffset = (height - inputLayerHeight) / 2;
+    let outputOffset = (height - outputLayerHeight) / 2;
+
+    let xPos, yPos;
+
+    for(let i = 0; i < this.connections.length; i++){
+      push();
+      if(this.connections[i].isEnabled()){
+        let inNode = this.nodes[this.getNodeIndex(this.connections[i].getInNodeId())];
+        let inNodeX = inNode.getX();
+        let inNodeY = inNode.getY();
+        let outNode = this.nodes[this.getNodeIndex(this.connections[i].getOutNodeId())];
+        let outNodeX = outNode.getX();
+        let outNodeY = outNode.getY();
+        let connectionWeight = this.connections[i].getWeight();
+        let thickness = map(Math.abs(connectionWeight), 0, 1, 1, 4);
+        this.setColorAndWeight(connectionWeight, thickness);
+        //console.log(inNodeX + ", " + inNodeY + ", " + outNodeX + ", " + outNodeX + ", " + thickness + ", " + connectionWeight);
+        line(inNodeX, inNodeY, outNodeX, outNodeY);
+      }
+      pop();
+
+    }
+
+    for(let i = 0; i < this.nodes.length; i++){
 
       push();
-      strokeWeight(2);
-      stroke(0);
-
+      // Set color for Node
       if(this.nodes[i].getIsValueSet()){
-        this.setColor(this.nodes[i].getValue());
+        this.setColorAndWeight(this.nodes[i].getValue(), 2);
       } else {
-        //fill(255);
-        this.setColor(Math.random());
+        this.setColorAndWeight(-1, 2);
+      }
+      // End Set color for Node
+
+      if(this.nodes[i].position.x == -1 && this.nodes[i].position.x == -1){
+        // Set coordinate
+        if(this.nodes[i].getType() == nodeType.IN){
+          // Inputs
+          xPos = x + (nodePadding * 2);
+          yPos = (y + nodePadding) * i + inputOffset;
+          this.nodes[i].setPosition(xPos, yPos);
+
+
+        } else if(this.nodes[i].getType() == nodeType.OUT){
+          // Outputs
+          xPos = x + width - (nodePadding * 2);
+          yPos = (y + nodePadding) * (i - (this.numInputs + this.numHiddenNodes)) + outputOffset;
+          this.nodes[i].setPosition(xPos, yPos);
+
+
+        } else {
+          // Hidden Layers
+
+
+        }
+        // End Set coordinate
       }
 
-      let xPos = x + (nodePadding * 2);
-      let yPos = (y + nodePadding) * i + offset;
-      let wid = nodeRadius;
-      let hgt = nodeRadius;
-      ellipse(xPos, yPos, wid, hgt);
+      ellipse(this.nodes[i].position.x, this.nodes[i].position.y, nodeRadius, nodeRadius);
+
       pop();
     }
-
-    offset = (height - outputLayerHeight) / 2;
-
-    // visualize outputs
-    for(let i = this.numOutputs; i > 0; i--){
-
-      push();
-      strokeWeight(2);
-      stroke(0);
-
-      if(this.nodes[this.nodes.length - i].getIsValueSet()){
-        this.setColor(this.nodes[i].getValue());
-      } else {
-        //fill(255);
-        this.setColor(Math.random());
-      }
-
-      let xPos = x + width - (nodePadding * 2);
-      let yPos = (y + nodePadding) * i + offset;
-      let wid = nodeRadius;
-      let hgt = nodeRadius;
-      ellipse(xPos, yPos, wid, hgt);
-      pop();
-    }
-
 
   }
 
