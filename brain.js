@@ -72,18 +72,55 @@ class Brain {
     return newConnection;
   }
 
+  chooseRandomType(){
+    let randType = Math.round(randInt(0, 2));
+    switch (randType) {
+      case 0:
+        return nodeType.IN;
+      case 1:
+        return nodeType.OUT;
+      case 2:
+        return nodeType.HID;
+    }
+
+  }
+
   mutateAddConnection(){
     let inNodeIndex, outNodeIndex, inNodeId, outNodeId, weight, enabled, innov;
     let selectNewNodes = true;
     while(selectNewNodes){
+      let inNodeType = this.chooseRandomType();
+      while(inNodeType == nodeType.OUT || (inNodeType == nodeType.HID && this.totalDepth == 2)){
+        inNodeType = this.chooseRandomType();
+      }
+      let outNodeType = this.chooseRandomType();
+      while(outNodeType == nodeType.IN || (outNodeType == nodeType.HID && this.totalDepth == 2)){
+        outNodeType = this.chooseRandomType();
+      }
+      //console.log(inNodeType + ", "  + outNodeType);
 
-      inNodeIndex = randInt(0, this.numNodes - this.numOutputs);
-      outNodeIndex = randInt(this.numInputs, this.numNodes - 1);
+      if(inNodeType == nodeType.IN){
+        inNodeIndex = randInt(0, this.numInputs - 1);
+      } else {
+        inNodeIndex = randInt(this.numInputs + this.numOutputs, this.numNodes - 1);
+      }
+      // console.log(this.numInputs + this.numOutputs);
+      // console.log(this.numNodes);
+      if(outNodeType == nodeType.OUT){
+        outNodeIndex = randInt(this.numInputs, this.numInputs + this.numOutputs - 1);
+      } else {
+        outNodeIndex = randInt(this.numInputs + this.numOutputs, this.numNodes - 1);
+      }
+
+      //console.log(randInt(0,1));
+
       if(this.nodes[outNodeIndex].getDepth() < this.nodes[inNodeIndex].getDepth()){
         let temp = outNodeIndex;
         outNodeIndex = inNodeIndex;
         inNodeIndex = temp;
       }
+
+
 
       selectNewNodes = false;
       for(let i = 0; i < this.connections.length; i++){   // Traverse connections to see if it Already exists
@@ -99,7 +136,8 @@ class Brain {
     outNodeId = this.getNodeId(outNodeIndex);
 
     weight = randFloat(-1, 1);
-    enabled = randBool();
+    //enabled = randBool();
+    enabled = true;
     innov = this.numConnections + 1;
 
     this.connections.push(this.createNewConnection(inNodeId, outNodeId, weight, enabled, innov));
@@ -109,6 +147,15 @@ class Brain {
   }
 
   mutateAddNode(){
+    let randIndex = randInt(0, this.numConnections);
+    while(!this.connections[randIndex].isEnabled()){
+      randIndex = randInt(0, this.numConnections);
+    }
+
+    let inNodeId = this.connections[randIndex].getInNodeId();
+    let outNodeId = this.connections[randIndex].getOutNodeId();
+
+    //let newNode = createNewNode
 
   }
 

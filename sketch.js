@@ -10,7 +10,7 @@ function draw() {
 	console.log(brain.toString());
 	background(225);
 	brain.visualize(0, 0, windowWidth, windowHeight);
-	if(frameCount == 3){
+	if(frameCount % 12 == 0){
 		brain.mutateAddConnection();
 	}
 }
