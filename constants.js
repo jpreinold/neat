@@ -10,6 +10,18 @@ const negativeColor = {
   B: 105
 }
 
+const notActivatedColor = {
+  R: 255,
+  G: 255,
+  B: 255
+}
+
+const activatedColor = {
+  R: 115,
+  G: 0,
+  B: 153
+}
+
 function randInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1) ) + min;
 }
@@ -49,3 +61,15 @@ let visualizeX;
 let visualizeY;
 let visualizeWidth;
 let visualizeHeight;
+
+let probInherGeneIsDisabled = 75;
+let probConnWeightIsMutated = 80;
+let probConnWeightMutationIsUP = 90;
+let probConnWeightMutationIsRandom = 10;
+let probMutationWOCrossover = 25;
+let probAddingNewNode = 3;
+let probAddingNewConnection = 5;
+
+let interspeciesMatingRate = .001;
+
+let populationSize = 3;
