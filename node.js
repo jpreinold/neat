@@ -100,6 +100,6 @@ class Node {
     if(this.isValueSet){
       value = ", value: " + str(this.value);
     }
-    return "Node: id: " + this.id + ", type: " + this.type + value + ", Position: (" + this.position.getX() + ", " + this.position.getY() + "), Depth: " + this.depth;
+    return "Node: id: " + this.id + ", type: " + this.type + value + ", Position: (" + Math.round(this.position.getX()) + ", " + Math.round(this.position.getY()) + "), Depth: " + this.depth;
   }
 }
